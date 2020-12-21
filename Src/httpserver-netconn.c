@@ -279,7 +279,7 @@ static void http_server_netconn_thread(void *arg)
   if (conn!= NULL)
   {
     /* Bind to port 80 (HTTP) with default IP address */
-    err = netconn_bind(conn, IP_ADDR_ANY, 80);
+    err = netconn_bind(conn, NULL, 80);
     if (err == ERR_OK)
     {
       /* Put the connection into LISTEN state */
@@ -291,9 +291,9 @@ static void http_server_netconn_thread(void *arg)
         if(accept_err == ERR_OK)
         {
           /* serve connection */
-          http_server_serve(conn);
+          http_server_serve(newconn);
           /* delete connection */
-          netconn_delete(conn);
+          netconn_delete(newconn);
         }
       }
     }
@@ -370,18 +370,19 @@ void DynWebPage2(struct netconn *conn)
   portCHAR PAGE_BEGIN[512];
   portCHAR pagehits[10] = {0};
 
-  memset(PAGE_BODY, 0,512);
+//  memset(PAGE_BODY, 0,512);
   memset(PAGE_BEGIN, 0,512);
 
   /* Update the hit count */
   nPageHits++;
   sprintf(pagehits, "%d", (int)nPageHits);
-  strcat(PAGE_BODY, "helloworld");
+  strcat(PAGE_BODY, pagehits);
 //  strcat((char *)PAGE_BEGIN, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
 //  strcat((char *)PAGE_BEGIN, "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" xmlns=\"http://www.w3.org/TR/REC-html40\">");
 
   /* Send the dynamically generated page */
   netconn_write(conn, PAGE_START, strlen((char*)PAGE_START), NETCONN_COPY);
+//  netconn_write(conn, PAGE_BODY, strlen((char*)PAGE_BODY), NETCONN_COPY);
   LCD_UsrLog ("%.150s\n", PAGE_START);
-  netconn_write(conn, PAGE_BODY, strlen(PAGE_BODY), NETCONN_COPY);
+  netconn_write(conn, PAGE_BODY, strlen((char*)PAGE_BODY), NETCONN_COPY);
 }
